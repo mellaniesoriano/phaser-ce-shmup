@@ -152,5 +152,8 @@
   function gameOver() {
     game.state.destroy();
     game.add.text(90, 200, 'BOOM! YOU DEAD! x_X', { fill: '#FFFFFF' });
+    let playAgain = game.add.text(120, 300, 'Play Again', { fill: '#ffffff' });
+    playAgain.inputEnabled = true;
+    playAgain.events.onInputUp.add(() => window.location.reload());
   }
 })(window.Phaser);
