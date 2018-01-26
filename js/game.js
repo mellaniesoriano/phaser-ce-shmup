@@ -6,6 +6,9 @@
   const INITIAL_MOVESPEED = 4;
   const SQRT_TWO = Math.sqrt(2);
   const PLAYER_BULLET_SPEED = 6;
+  const ENEMY_SPAWN_FREQ = 100;
+  const randomGenerator = new Phaser.RandomDataGenerator();
+  const ENEMY_SPEED = 3.5;
 
   const game = new Phaser.Game(
     GAME_WIDTH,
@@ -19,6 +22,7 @@
   let player;
   let cursors;
   let playerBullets;
+  let enemies;
 
   function preload() {
     game.load.spritesheet(
@@ -34,14 +38,20 @@
     cursors.fire = game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
     cursors.fire.onUp.add(handlePlayerFire);
 
-    player = game.add.sprite(100, 100, GFX, 8);
+    player = game.add.sprite(200, 400, GFX, 8);
     player.moveSpeed = INITIAL_MOVESPEED;
     playerBullets = game.add.group();
+    enemies = game.add.group();
   }
 
   function update() {
     handlePlayerMovement();
     handleBulletAnimations();
+    randomlySpawnEnemy();
+    handleEnemyActions();
+    handleCollisions();
+
+    cleanup();
   }
 
   // handler methods
@@ -81,6 +91,35 @@
     playerBullets.children.forEach(bullet => (bullet.y -= PLAYER_BULLET_SPEED));
   }
 
+  function handleEnemyActions() {
+    enemies.children.forEach(enemy => (enemy.y += ENEMY_SPEED));
+  }
+
+  function handleCollisions() {
+    // check if any bullets touch any enemies
+    let enemiesHit = enemies.children
+      .filter(enemy => enemy.alive)
+      .filter(enemy =>
+        playerBullets.children.some(bullet => enemy.overlap(bullet))
+      );
+
+    if (enemiesHit.length) {
+      // clean up bullets that land
+      playerBullets.children
+        .filter(bullet => bullet.overlap(enemies))
+        .forEach(removeBullet);
+
+      enemiesHit.forEach(destroyEnemy);
+    }
+  }
+
+  function randomlySpawnEnemy() {
+    if (randomGenerator.between(0, ENEMY_SPAWN_FREQ) === 0) {
+      let randomX = randomGenerator.between(0, GAME_WIDTH);
+      enemies.add(game.add.sprite(randomX, -24, GFX, 0));
+    }
+  }
+
   // utility functions
   function cleanup() {
     playerBullets.children
@@ -88,5 +127,13 @@
       .filter(bullet => bullet.y < 0)
       // destroy if bullet is offscreen
       .forEach(bullet => bullet.destroy());
+  }
+
+  function removeBullet(bullet) {
+    bullet.destroy();
+  }
+
+  function destroyEnemy(enemy) {
+    enemy.kill();
   }
 })(window.Phaser);
