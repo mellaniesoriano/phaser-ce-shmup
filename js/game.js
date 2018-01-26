@@ -80,4 +80,13 @@
   function handleBulletAnimations() {
     playerBullets.children.forEach(bullet => (bullet.y -= PLAYER_BULLET_SPEED));
   }
+
+  // utility functions
+  function cleanup() {
+    playerBullets.children
+      // if y < 0 means if bullet is offscreen
+      .filter(bullet => bullet.y < 0)
+      // destroy if bullet is offscreen
+      .forEach(bullet => bullet.destroy());
+  }
 })(window.Phaser);
