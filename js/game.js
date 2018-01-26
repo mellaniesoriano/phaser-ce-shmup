@@ -5,6 +5,7 @@
   const GFX = 'gfx';
   const INITIAL_MOVESPEED = 4;
   const SQRT_TWO = Math.sqrt(2);
+  const PLAYER_BULLET_SPEED = 6;
 
   const game = new Phaser.Game(
     GAME_WIDTH,
@@ -40,6 +41,7 @@
 
   function update() {
     handlePlayerMovement();
+    handleBulletAnimations();
   }
 
   // handler methods
@@ -72,6 +74,10 @@
   }
 
   function handlePlayerFire() {
-    console.log('fire');
+    playerBullets.add(game.add.sprite(player.x, player.y, GFX, 7));
+  }
+
+  function handleBulletAnimations() {
+    playerBullets.children.forEach(bullet => (bullet.y -= PLAYER_BULLET_SPEED));
   }
 })(window.Phaser);
