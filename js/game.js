@@ -9,6 +9,8 @@
   const ENEMY_SPAWN_FREQ = 100;
   const randomGenerator = new Phaser.RandomDataGenerator();
   const ENEMY_SPEED = 3.5;
+  const ENEMY_FIRE_FREQ = 30;
+  const ENEMY_BULLET_ACCEL = 100;
 
   const game = new Phaser.Game(
     GAME_WIDTH,
@@ -23,6 +25,7 @@
   let cursors;
   let playerBullets;
   let enemies;
+  let enemyBullets;
 
   function preload() {
     game.load.spritesheet(
@@ -42,6 +45,8 @@
     player.moveSpeed = INITIAL_MOVESPEED;
     playerBullets = game.add.group();
     enemies = game.add.group();
+    enemyBullets = game.add.group();
+    enemyBullets.enableBody = true;
   }
 
   function update() {
@@ -89,10 +94,18 @@
 
   function handleBulletAnimations() {
     playerBullets.children.forEach(bullet => (bullet.y -= PLAYER_BULLET_SPEED));
+    enemyBullets.children.forEach(bullet => {
+      game.physics.arcade.accelerateToObject(
+        bullet,
+        player,
+        ENEMY_BULLET_ACCEL
+      );
+    });
   }
 
   function handleEnemyActions() {
     enemies.children.forEach(enemy => (enemy.y += ENEMY_SPEED));
+    enemies.children.forEach(enemy => randomEnemyFire(enemy));
   }
 
   function handleCollisions() {
@@ -132,12 +145,27 @@
     }
   }
 
+  function randomEnemyFire(enemy) {
+    if (randomGenerator.between(0, ENEMY_FIRE_FREQ) === 0) {
+      let enemyBullet = game.add.sprite(enemy.x, enemy.y, GFX, 9);
+      enemyBullet.checkWorldBounds = true;
+      enemyBullet.outOfBoundsKill = true;
+      enemyBullets.add(enemyBullet);
+    }
+  }
+
   // utility functions
   function cleanup() {
     playerBullets.children
       // if y < 0 means if bullet is offscreen
       .filter(bullet => bullet.y < 0)
       // destroy if bullet is offscreen
+      .forEach(bullet => bullet.destroy());
+    enemies.children
+      .filter(enemy => enemy.y > GAME_HEIGHT || !enemy.alive)
+      .forEach(enemy => enemy.destroy());
+    enemyBullets.children
+      .filter(bullet => !bullet.alive)
       .forEach(bullet => bullet.destroy());
   }
 
