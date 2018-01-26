@@ -3,6 +3,7 @@
   const GAME_HEIGHT = 600;
   const GAME_CONTAINER_ID = 'game';
   const GFX = 'gfx';
+  const INITIAL_MOVESPEED = 4;
 
   const game = new Phaser.Game(
     GAME_WIDTH,
@@ -12,7 +13,9 @@
     { preload, create, update }
   );
 
+  // global variables
   let player;
+  let cursors;
 
   function preload() {
     game.load.spritesheet(
@@ -24,8 +27,32 @@
   }
 
   function create() {
-    game.add.sprite(100, 100, GFX, 8);
+    cursors = game.input.keyboard.createCursorKeys();
+    player = game.add.sprite(100, 100, GFX, 8);
+    player.moveSpeed = INITIAL_MOVESPEED;
   }
 
-  function update() {}
+  function update() {
+    handlePlayerMovement();
+  }
+
+  // handler methods
+  function handlePlayerMovement() {
+    switch (true) {
+      case cursors.left.isDown:
+        player.x -= player.moveSpeed;
+        break;
+      case cursors.right.isDown:
+        player.x += player.moveSpeed;
+        break;
+    }
+    switch (true) {
+      case cursors.down.isDown:
+        player.y += player.moveSpeed;
+        break;
+      case cursors.up.isDown:
+        player.y -= player.moveSpeed;
+        break;
+    }
+  }
 })(window.Phaser);
