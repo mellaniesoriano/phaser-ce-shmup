@@ -111,6 +111,18 @@
 
       enemiesHit.forEach(destroyEnemy);
     }
+    // check if enemies hit the player
+    enemiesHit = enemies.children.filter(enemy => enemy.overlap(player));
+
+    if (enemiesHit.length) {
+      handlePlayerHit();
+
+      enemiesHit.forEach(destroyEnemy);
+    }
+  }
+
+  function handlePlayerHit() {
+    gameOver();
   }
 
   function randomlySpawnEnemy() {
@@ -135,5 +147,10 @@
 
   function destroyEnemy(enemy) {
     enemy.kill();
+  }
+
+  function gameOver() {
+    game.state.destroy();
+    game.add.text(90, 200, 'BOOM! YOU DEAD! x_X', { fill: '#FFFFFF' });
   }
 })(window.Phaser);
